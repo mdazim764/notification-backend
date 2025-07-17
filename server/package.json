@@ -1,0 +1,13 @@
+{
+  "name": "notification-server",
+  "version": "1.0.0",
+  "description": "Simple notification server for React Native",
+  "main": "notification-server.js",
+  "scripts": {
+    "start": "node notification-server.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.6.7"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "messages": [
+    {
+      "id": "1752642990490",
+      "title": "broad cast test",
+      "message": "it is borad cast",
+      "data": {
+        "screen": "Home",
+        "userId": "wbVl5Nl2fYRsxIal9Vhvdkr9uVA2",
+        "source": "broadcast",
+        "timestamp": "2025-07-16T05:16:30.315Z"
+      },
+      "sentAt": "2025-07-16T05:16:30.490Z",
+      "recipients": [
+        "1752296313963",
+        "1752302615938",
+        "1752473157369",
+        "1752474409213",
+        "1752475392767",
+        "1752481477847"
+      ],
+      "receivedBy": [],
+      "type": "info",
+      "isBroadcast": true
+    },
+    {
+      "id": "1752643180830",
+      "title": "test",
+      "message": "test",
+      "data": {
+        "screen": "Home",
+        "userId": "wbVl5Nl2fYRsxIal9Vhvdkr9uVA2",
+        "source": "broadcast",
+        "timestamp": "2025-07-16T05:19:40.652Z"
+      },
+      "sentAt": "2025-07-16T05:19:40.830Z",
+      "recipients": [
+        "1752296313963",
+        "1752302615938",
+        "1752473157369",
+        "1752474409213",
+        "1752475392767",
+        "1752481477847"
+      ],
+      "receivedBy": [],
+      "type": "info",
+      "isBroadcast": true
+    },
+    {
+      "id": "1752643668971",
+      "title": "test",
+      "message": "test",
+      "data": {
+        "screen": "Home",
+        "userId": "wbVl5Nl2fYRsxIal9Vhvdkr9uVA2",
+        "source": "broadcast",
+        "timestamp": "2025-07-16T05:27:48.794Z"
+      },
+      "sentAt": "2025-07-16T05:27:48.971Z",
+      "recipients": [
+        "1752296313963",
+        "1752302615938",
+        "1752473157369",
+        "1752474409213",
+        "1752475392767",
+        "1752481477847"
+      ],
+      "receivedBy": [],
+      "type": "error",
+      "isBroadcast": true
+    },
+    {
+      "id": "1752644169630",
+      "title": "test broadcast",
+      "message": "test broadcast",
+      "data": {
+        "screen": "Home",
+        "userId": "wbVl5Nl2fYRsxIal9Vhvdkr9uVA2",
+        "source": "broadcast",
+        "timestamp": "2025-07-16T05:36:09.433Z"
+      },
+      "sentAt": "2025-07-16T05:36:09.630Z",
+      "recipients": [
+        "1752296313963",
+        "1752302615938",
+        "1752473157369",
+        "1752474409213",
+        "1752475392767",
+        "1752481477847"
+      ],
+      "receivedBy": [],
+      "type": "info",
+      "isBroadcast": true
+    }
+  ]
+}

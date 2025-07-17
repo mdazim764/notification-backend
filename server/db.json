@@ -1,0 +1,159 @@
+{
+  "devices": [
+    {
+      "id": "1752207526037",
+      "token": "c_tCZZWCT_q9zumo_OFzDG:APA91bHoqrZPOuUhgWfvQpWuSBPufUKrXlseuY2EAO9n9BdTzt0Yh8otxLZpUTQjN6Pu8-LeZBOAGIgvcEqY9LBK5DFuDidAK0xTVjeveS-gjsKDtNocudE",
+      "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+      "platform": "android",
+      "createdAt": "2025-07-11T04:18:46.038Z",
+      "deviceName": "Android Device",
+      "appVersion": "1.0.0"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1752207558184",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default"
+      },
+      "sentAt": "2025-07-11T04:19:18.184Z",
+      "status": "sent",
+      "results": [
+        {
+          "error": "invalid json response body at https://fcm.googleapis.com/fcm/send reason: Unexpected token '<', \"<HTML>\n<HE\"... is not valid JSON"
+        }
+      ]
+    },
+    {
+      "id": "1752207591117",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default"
+      },
+      "sentAt": "2025-07-11T04:19:51.117Z",
+      "status": "sent",
+      "results": [
+        {
+          "error": "invalid json response body at https://fcm.googleapis.com/fcm/send reason: Unexpected token '<', \"<HTML>\n<HE\"... is not valid JSON"
+        }
+      ]
+    },
+    {
+      "id": "1752208252389",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default"
+      },
+      "sentAt": "2025-07-11T04:30:52.389Z",
+      "status": "sent",
+      "results": [
+        {
+          "error": "invalid json response body at https://fcm.googleapis.com/fcm/send reason: Unexpected token '<', \"<HTML>\n<HE\"... is not valid JSON"
+        }
+      ]
+    },
+    {
+      "id": "1752208833243",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default",
+        "source": "custom-server"
+      },
+      "sentAt": "2025-07-11T04:40:33.243Z",
+      "status": "sent",
+      "results": [
+        {
+          "error": "invalid json response body at https://fcm.googleapis.com/fcm/send reason: Unexpected token '<', \"<HTML>\n<HE\"... is not valid JSON"
+        }
+      ]
+    },
+    {
+      "id": "1752209171371",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default",
+        "source": "custom-server"
+      },
+      "sentAt": "2025-07-11T04:46:11.371Z",
+      "status": "sent",
+      "results": [
+        {
+          "error": "invalid json response body at https://fcm.googleapis.com/fcm/send reason: Unexpected token '<', \"<HTML>\n<HE\"... is not valid JSON"
+        }
+      ]
+    },
+    {
+      "id": "1752210178445",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default",
+        "source": "custom-server"
+      },
+      "sentAt": "2025-07-11T05:02:58.445Z",
+      "status": "sent",
+      "devices": [
+        {
+          "token": "c_tCZZWCT_q9zumo_OFzDG:APA91bHoqrZPOuUhgWfvQpWuSBPufUKrXlseuY2EAO9n9BdTzt0Yh8otxLZpUTQjN6Pu8-LeZBOAGIgvcEqY9LBK5DFuDidAK0xTVjeveS-gjsKDtNocudE",
+          "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2"
+        }
+      ]
+    },
+    {
+      "id": "1752210186853",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default",
+        "source": "custom-server"
+      },
+      "sentAt": "2025-07-11T05:03:06.853Z",
+      "status": "sent",
+      "devices": [
+        {
+          "token": "c_tCZZWCT_q9zumo_OFzDG:APA91bHoqrZPOuUhgWfvQpWuSBPufUKrXlseuY2EAO9n9BdTzt0Yh8otxLZpUTQjN6Pu8-LeZBOAGIgvcEqY9LBK5DFuDidAK0xTVjeveS-gjsKDtNocudE",
+          "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2"
+        }
+      ]
+    },
+    {
+      "id": "1752212235424",
+      "title": "Test Notification",
+      "body": "This is a test notification from your custom server!",
+      "data": {
+        "type": "test",
+        "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2",
+        "channel": "default",
+        "source": "custom-server"
+      },
+      "sentAt": "2025-07-11T05:37:15.424Z",
+      "status": "sent",
+      "devices": [
+        {
+          "token": "c_tCZZWCT_q9zumo_OFzDG:APA91bHoqrZPOuUhgWfvQpWuSBPufUKrXlseuY2EAO9n9BdTzt0Yh8otxLZpUTQjN6Pu8-LeZBOAGIgvcEqY9LBK5DFuDidAK0xTVjeveS-gjsKDtNocudE",
+          "userId": "r4tQU6xXJDW5Xk4AqrUhO4XWuzZ2"
+        }
+      ]
+    }
+  ]
+}
