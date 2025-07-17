@@ -8,12 +8,19 @@ yarn-error.log*
 build/
 dist/
 
-# Environment variables
+# Environment variables - CRITICAL SECURITY
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+server/.env
+
+# Firebase/Google Cloud credentials
+service-account.json
+server/service-account.json
+firebase-service-account.json
+google-credentials.json
 
 # IDE files
 .vscode/
@@ -60,14 +67,3 @@ jspm_packages/
 
 # Vercel
 .vercel
-
-# Firebase/Google Cloud credentials - CRITICAL SECURITY
-service-account.json
-firebase-service-account.json
-google-credentials.json
-*.json
-
-# Environment-specific files
-.env*
-config/production.js
-config/development.js
