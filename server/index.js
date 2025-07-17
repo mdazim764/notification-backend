@@ -10,8 +10,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid conflicts
-
+const PORT = process.env.PORT || 3000;
 // Firebase Admin configuration from environment variables
 let serviceAccount = null;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -84,24 +83,6 @@ const saveSentMessages = (messages) =>
   writeFile(SENT_MESSAGES_FILE, { messages });
 const saveBroadcastMessages = (messages) =>
   writeFile(BROADCAST_MESSAGES_FILE, { messages });
-
-function getBroadcasts() {
-  try {
-    const data = fs.readFileSync(
-      path.join(__dirname, "broadcast-messages.json")
-    );
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-}
-
-function saveBroadcasts(broadcasts) {
-  fs.writeFileSync(
-    path.join(__dirname, "broadcast-messages.json"),
-    JSON.stringify(broadcasts, null, 2)
-  );
-}
 
 // Routes
 
@@ -314,7 +295,7 @@ app.post("/api/broadcasts/send", (req, res) => {
 
     const broadcastId = Date.now().toString();
 
-    const broadcasts = getBroadcasts();
+    const broadcasts = getBroadcastMessages();
     const newBroadcast = {
       id: broadcastId,
       title,
@@ -331,7 +312,7 @@ app.post("/api/broadcasts/send", (req, res) => {
     };
 
     broadcasts.push(newBroadcast);
-    saveBroadcasts(broadcasts);
+    saveBroadcastMessages(broadcasts);
 
     res.json({
       success: true,
@@ -340,6 +321,7 @@ app.post("/api/broadcasts/send", (req, res) => {
       recipients: devices.length,
     });
   } catch (error) {
+    console.error("Error in broadcast endpoint:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -356,7 +338,7 @@ app.post("/api/broadcasts/received", (req, res) => {
       });
     }
 
-    const broadcasts = getBroadcasts();
+    const broadcasts = getBroadcastMessages();
     const broadcastIndex = broadcasts.findIndex((b) => b.id === broadcastId);
 
     if (broadcastIndex === -1) {
@@ -365,7 +347,7 @@ app.post("/api/broadcasts/received", (req, res) => {
 
     if (!broadcasts[broadcastIndex].receivedBy.includes(deviceId)) {
       broadcasts[broadcastIndex].receivedBy.push(deviceId);
-      saveBroadcasts(broadcasts);
+      saveBroadcastMessages(broadcasts);
     }
 
     res.json({
@@ -373,6 +355,7 @@ app.post("/api/broadcasts/received", (req, res) => {
       message: "Broadcast marked as received",
     });
   } catch (error) {
+    console.error("Error marking broadcast as received:", error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -91,6 +91,31 @@
       "receivedBy": [],
       "type": "info",
       "isBroadcast": true
+    },
+    {
+      "id": "1752775669497",
+      "title": "dd",
+      "message": "dd",
+      "type": "info",
+      "data": {
+        "screen": "Home",
+        "userId": "wbVl5Nl2fYRsxIal9Vhvdkr9uVA2",
+        "source": "broadcast",
+        "timestamp": "2025-07-17T18:07:48.636Z",
+        "broadcastId": "1752775669497"
+      },
+      "sentAt": "2025-07-17T18:07:49.498Z",
+      "recipients": [
+        "1752296313963",
+        "1752302615938",
+        "1752473157369",
+        "1752474409213",
+        "1752475392767",
+        "1752481477847"
+      ],
+      "receivedBy": [
+        "1752481477847"
+      ]
     }
   ]
 }
