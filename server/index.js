@@ -29,7 +29,9 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     console.error("❌ Error loading service account file:", error.message);
   }
 } else {
-  console.warn("⚠️ No Firebase service account found. Some features may not work.");
+  console.warn(
+    "⚠️ No Firebase service account found. Some features may not work."
+  );
 }
 
 // File paths
@@ -72,16 +74,22 @@ const writeFile = (filePath, data) => {
 const getDevices = () => readFile(DEVICES_FILE).devices || [];
 const getPendingMessages = () => readFile(PENDING_MESSAGES_FILE).messages || [];
 const getSentMessages = () => readFile(SENT_MESSAGES_FILE).messages || [];
-const getBroadcastMessages = () => readFile(BROADCAST_MESSAGES_FILE).messages || [];
+const getBroadcastMessages = () =>
+  readFile(BROADCAST_MESSAGES_FILE).messages || [];
 
 const saveDevices = (devices) => writeFile(DEVICES_FILE, { devices });
-const savePendingMessages = (messages) => writeFile(PENDING_MESSAGES_FILE, { messages });
-const saveSentMessages = (messages) => writeFile(SENT_MESSAGES_FILE, { messages });
-const saveBroadcastMessages = (messages) => writeFile(BROADCAST_MESSAGES_FILE, { messages });
+const savePendingMessages = (messages) =>
+  writeFile(PENDING_MESSAGES_FILE, { messages });
+const saveSentMessages = (messages) =>
+  writeFile(SENT_MESSAGES_FILE, { messages });
+const saveBroadcastMessages = (messages) =>
+  writeFile(BROADCAST_MESSAGES_FILE, { messages });
 
 function getBroadcasts() {
   try {
-    const data = fs.readFileSync(path.join(__dirname, "broadcast-messages.json"));
+    const data = fs.readFileSync(
+      path.join(__dirname, "broadcast-messages.json")
+    );
     return JSON.parse(data);
   } catch (error) {
     return [];
@@ -202,7 +210,9 @@ app.post("/api/messages/send", (req, res) => {
       return res.status(404).json({ error: "No devices registered" });
     }
 
-    const messageIndex = pendingMessages.findIndex((m) => m.id === sendRequest.messageId);
+    const messageIndex = pendingMessages.findIndex(
+      (m) => m.id === sendRequest.messageId
+    );
     if (messageIndex === -1) {
       return res.status(404).json({ error: "Message not found" });
     }
@@ -249,14 +259,18 @@ app.post("/api/messages/read", (req, res) => {
     }
 
     const sentMessages = getSentMessages();
-    const messageIndex = sentMessages.findIndex((m) => m.id === readRequest.messageId);
+    const messageIndex = sentMessages.findIndex(
+      (m) => m.id === readRequest.messageId
+    );
 
     if (messageIndex === -1) {
       return res.status(404).json({ error: "Message not found" });
     }
 
     const message = sentMessages[messageIndex];
-    const recipientIndex = message.recipients.findIndex((r) => r.deviceId === readRequest.deviceId);
+    const recipientIndex = message.recipients.findIndex(
+      (r) => r.deviceId === readRequest.deviceId
+    );
 
     if (recipientIndex === -1) {
       return res.status(404).json({ error: "Recipient not found" });
@@ -463,13 +477,23 @@ if (process.env.NODE_ENV !== "production") {
     console.log(`   - POST /api/messages - Create a pending message`);
     console.log(`   - GET /api/messages/pending - Get all pending messages`);
     console.log(`   - GET /api/messages/sent - Get all sent messages`);
-    console.log(`   - POST /api/messages/send - Send a specific pending message`);
-    console.log(`   - POST /api/messages/send-targeted - Send to specific users`);
+    console.log(
+      `   - POST /api/messages/send - Send a specific pending message`
+    );
+    console.log(
+      `   - POST /api/messages/send-targeted - Send to specific users`
+    );
     console.log(`   - POST /api/messages/read - Mark a message as read`);
     console.log(`   - GET /api/broadcasts - Get all broadcasts`);
-    console.log(`   - POST /api/broadcasts/send - Send a broadcast to all devices`);
-    console.log(`   - POST /api/broadcasts/received - Mark a broadcast as received`);
-    console.log(`   - GET /api/broadcast/devices - Get all devices for broadcast admin`);
+    console.log(
+      `   - POST /api/broadcasts/send - Send a broadcast to all devices`
+    );
+    console.log(
+      `   - POST /api/broadcasts/received - Mark a broadcast as received`
+    );
+    console.log(
+      `   - GET /api/broadcast/devices - Get all devices for broadcast admin`
+    );
     console.log(`   - GET /health - Health check`);
   });
 
@@ -477,7 +501,9 @@ if (process.env.NODE_ENV !== "production") {
   server.on("error", (err) => {
     if (err.code === "EADDRINUSE") {
       console.error(`❌ Port ${PORT} is already in use. Try a different port.`);
-      console.log(`💡 You can set a different port: set PORT=3002 && npm start`);
+      console.log(
+        `💡 You can set a different port: set PORT=3002 && npm start`
+      );
     } else {
       console.error("❌ Server error:", err);
     }
