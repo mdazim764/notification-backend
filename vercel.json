@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd server && npm install",
+  "outputDirectory": "server",
   "builds": [
     {
       "src": "server/index.js",
@@ -7,6 +9,14 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.js"
+    },
+    {
+      "src": "/health",
+      "dest": "server/index.js"
+    },
     {
       "src": "/(.*)",
       "dest": "server/index.js"

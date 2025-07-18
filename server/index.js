@@ -1,3 +1,8 @@
+// Handle paths properly in serverless environment
+if (process.env.NODE_ENV === "production") {
+  process.env.PWD = process.cwd();
+}
+
 // For Vercel environment paths
 if (process.env.NODE_ENV === "production") {
   // For Vercel serverless environment, use in-memory storage instead of files
@@ -51,7 +56,7 @@ const SENT_MESSAGES_FILE = path.join(__dirname, "sent-messages.json");
 const BROADCAST_MESSAGES_FILE = path.join(__dirname, "broadcast-messages.json");
 
 // Initialize files/memory if they don't exist
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   // In development, use files
   if (!fs.existsSync(DEVICES_FILE)) {
     fs.writeFileSync(DEVICES_FILE, JSON.stringify({ devices: [] }));
@@ -74,6 +79,12 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Log requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
 
 // Helper functions with Vercel serverless support
 const readFile = (filePath) => {
@@ -490,6 +501,15 @@ app.get("/health", (req, res) => {
   });
 });
 
+// API status
+app.get("/", (req, res) => {
+  res.json({
+    status: "API is running",
+    version: "1.0.0",
+    endpoints: ["/api/devices", "/api/messages", "/api/broadcasts", "/health"],
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err.stack);
@@ -498,7 +518,13 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
+  console.log(`404 Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({
+    error: "Not found",
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Start the server (for local development)
@@ -546,5 +572,5 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Export for Vercel
+// Export Express API for serverless deployment
 module.exports = app;
