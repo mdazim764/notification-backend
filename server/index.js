@@ -14,6 +14,20 @@ if (process.env.NODE_ENV === "production") {
   };
 }
 
+// Add this near the top of your file where you initialize memoryDb
+if (process.env.NODE_ENV === "production") {
+  // Initialize with empty arrays if they don't exist
+  global.memoryDb = global.memoryDb || {
+    devices: [],
+    pendingMessages: [],
+    sentMessages: [],
+    broadcastMessages: [],
+  };
+
+  // Log the initialization
+  console.log("✅ In-memory database initialized for Vercel environment");
+}
+
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -392,25 +406,49 @@ app.post("/api/broadcasts/send", (req, res) => {
 // Mark broadcast as received
 app.post("/api/broadcasts/received", (req, res) => {
   try {
+    console.log("📝 Received broadcast confirmation request:", req.body);
+
     const receiveData = req.body;
     const { broadcastId, deviceId } = receiveData;
 
     if (!broadcastId || !deviceId) {
+      console.log("❌ Missing broadcastId or deviceId in request");
       return res.status(400).json({
         error: "Broadcast ID and Device ID are required",
       });
     }
 
     const broadcasts = getBroadcastMessages();
+    console.log(`🔍 Looking for broadcast with ID: ${broadcastId}`);
+    console.log(`📊 Total broadcasts: ${broadcasts.length}`);
+
+    // Log broadcast IDs to help with debugging
+    if (broadcasts.length > 0) {
+      console.log(
+        "📋 Available broadcast IDs:",
+        broadcasts.map((b) => b.id)
+      );
+    }
+
     const broadcastIndex = broadcasts.findIndex((b) => b.id === broadcastId);
 
     if (broadcastIndex === -1) {
+      console.log(`❌ Broadcast with ID ${broadcastId} not found`);
       return res.status(404).json({ error: "Broadcast not found" });
     }
+
+    console.log(`✅ Found broadcast at index ${broadcastIndex}`);
 
     if (!broadcasts[broadcastIndex].receivedBy.includes(deviceId)) {
       broadcasts[broadcastIndex].receivedBy.push(deviceId);
       saveBroadcastMessages(broadcasts);
+      console.log(
+        `✅ Marked broadcast ${broadcastId} as received by device ${deviceId}`
+      );
+    } else {
+      console.log(
+        `ℹ️ Broadcast ${broadcastId} already marked as received by device ${deviceId}`
+      );
     }
 
     res.json({
@@ -418,7 +456,7 @@ app.post("/api/broadcasts/received", (req, res) => {
       message: "Broadcast marked as received",
     });
   } catch (error) {
-    console.error("Error marking broadcast as received:", error);
+    console.error("❌ Error marking broadcast as received:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -510,6 +548,43 @@ app.get("/", (req, res) => {
   });
 });
 
+// Debug endpoint
+app.get("/api/debug", (req, res) => {
+  try {
+    // Return a snapshot of all data for debugging
+    const devices = getDevices();
+    const pendingMessages = getPendingMessages();
+    const sentMessages = getSentMessages();
+    const broadcasts = getBroadcastMessages();
+
+    res.json({
+      environment: process.env.NODE_ENV || "development",
+      memoryDb:
+        process.env.NODE_ENV === "production"
+          ? {
+              deviceCount: global.memoryDb.devices.length,
+              pendingCount: global.memoryDb.pendingMessages.length,
+              sentCount: global.memoryDb.sentMessages.length,
+              broadcastCount: global.memoryDb.broadcastMessages.length,
+            }
+          : "not using memory db",
+      counts: {
+        devices: devices.length,
+        pendingMessages: pendingMessages.length,
+        sentMessages: sentMessages.length,
+        broadcasts: broadcasts.length,
+      },
+      // Only include IDs to avoid exposing sensitive data
+      deviceIds: devices.map((d) => d.id),
+      broadcastIds: broadcasts.map((b) => b.id),
+      serverTime: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error in debug endpoint:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err.stack);
@@ -556,6 +631,7 @@ if (process.env.NODE_ENV !== "production") {
       `   - GET /api/broadcast/devices - Get all devices for broadcast admin`
     );
     console.log(`   - GET /health - Health check`);
+    console.log(`   - GET /api/debug - Debug endpoint`);
   });
 
   // Handle server errors
