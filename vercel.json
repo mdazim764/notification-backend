@@ -9,12 +9,10 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server/index.js"
+      "dest": "server/index.js"
     }
   ],
-  "functions": {
-    "server/index.js": {
-      "maxDuration": 30
-    }
+  "env": {
+    "NODE_ENV": "production"
   }
 }

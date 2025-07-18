@@ -494,5 +494,12 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Export the Express app for Vercel
+// This ensures the server works with Vercel
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
+
+// Export for Vercel
 module.exports = app;
