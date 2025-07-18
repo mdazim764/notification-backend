@@ -1,6 +1,12 @@
 // For Vercel environment paths
 if (process.env.NODE_ENV === "production") {
-  process.chdir(__dirname);
+  // For Vercel serverless environment, use in-memory storage instead of files
+  global.memoryDb = {
+    devices: [],
+    pendingMessages: [],
+    sentMessages: [],
+    broadcastMessages: [],
+  };
 }
 
 const express = require("express");
@@ -44,21 +50,24 @@ const PENDING_MESSAGES_FILE = path.join(__dirname, "pending-messages.json");
 const SENT_MESSAGES_FILE = path.join(__dirname, "sent-messages.json");
 const BROADCAST_MESSAGES_FILE = path.join(__dirname, "broadcast-messages.json");
 
-// Initialize files if they don't exist
-if (!fs.existsSync(DEVICES_FILE)) {
-  fs.writeFileSync(DEVICES_FILE, JSON.stringify({ devices: [] }));
-}
+// Initialize files/memory if they don't exist
+if (process.env.NODE_ENV !== 'production') {
+  // In development, use files
+  if (!fs.existsSync(DEVICES_FILE)) {
+    fs.writeFileSync(DEVICES_FILE, JSON.stringify({ devices: [] }));
+  }
 
-if (!fs.existsSync(PENDING_MESSAGES_FILE)) {
-  fs.writeFileSync(PENDING_MESSAGES_FILE, JSON.stringify({ messages: [] }));
-}
+  if (!fs.existsSync(PENDING_MESSAGES_FILE)) {
+    fs.writeFileSync(PENDING_MESSAGES_FILE, JSON.stringify({ messages: [] }));
+  }
 
-if (!fs.existsSync(SENT_MESSAGES_FILE)) {
-  fs.writeFileSync(SENT_MESSAGES_FILE, JSON.stringify({ messages: [] }));
-}
+  if (!fs.existsSync(SENT_MESSAGES_FILE)) {
+    fs.writeFileSync(SENT_MESSAGES_FILE, JSON.stringify({ messages: [] }));
+  }
 
-if (!fs.existsSync(BROADCAST_MESSAGES_FILE)) {
-  fs.writeFileSync(BROADCAST_MESSAGES_FILE, JSON.stringify({ messages: [] }));
+  if (!fs.existsSync(BROADCAST_MESSAGES_FILE)) {
+    fs.writeFileSync(BROADCAST_MESSAGES_FILE, JSON.stringify({ messages: [] }));
+  }
 }
 
 // Middleware
@@ -66,13 +75,51 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Helper functions
+// Helper functions with Vercel serverless support
 const readFile = (filePath) => {
-  return JSON.parse(fs.readFileSync(filePath));
+  if (process.env.NODE_ENV === "production") {
+    // Use in-memory storage in production/Vercel
+    const filename = path.basename(filePath, ".json");
+    switch (filename) {
+      case "devices":
+        return { devices: global.memoryDb.devices };
+      case "pending-messages":
+        return { messages: global.memoryDb.pendingMessages };
+      case "sent-messages":
+        return { messages: global.memoryDb.sentMessages };
+      case "broadcast-messages":
+        return { messages: global.memoryDb.broadcastMessages };
+      default:
+        return {};
+    }
+  } else {
+    // Use file system in development
+    return JSON.parse(fs.readFileSync(filePath));
+  }
 };
 
 const writeFile = (filePath, data) => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  if (process.env.NODE_ENV === "production") {
+    // Update in-memory storage in production/Vercel
+    const filename = path.basename(filePath, ".json");
+    switch (filename) {
+      case "devices":
+        global.memoryDb.devices = data.devices;
+        break;
+      case "pending-messages":
+        global.memoryDb.pendingMessages = data.messages;
+        break;
+      case "sent-messages":
+        global.memoryDb.sentMessages = data.messages;
+        break;
+      case "broadcast-messages":
+        global.memoryDb.broadcastMessages = data.messages;
+        break;
+    }
+  } else {
+    // Use file system in development
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  }
 };
 
 const getDevices = () => readFile(DEVICES_FILE).devices || [];
