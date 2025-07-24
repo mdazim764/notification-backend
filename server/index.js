@@ -636,6 +636,46 @@ app.post("/api/messages/send-targeted", (req, res) => {
   }
 });
 
+// Alias endpoint for compatibility with certain client versions
+app.post("/api/messages/broadcasts/received", (req, res) => {
+  console.log("📝 Using alias endpoint for broadcast confirmation");
+
+  try {
+    const { broadcastId, deviceId } = req.body;
+
+    if (!broadcastId || !deviceId) {
+      console.log("❌ Missing broadcastId or deviceId in request");
+      return res.status(400).json({
+        error: "Broadcast ID and Device ID are required",
+      });
+    }
+
+    const broadcasts = getBroadcastMessages();
+    const broadcastIndex = broadcasts.findIndex((b) => b.id === broadcastId);
+
+    if (broadcastIndex === -1) {
+      console.log(`❌ Broadcast with ID ${broadcastId} not found`);
+      return res.status(404).json({ error: "Broadcast not found" });
+    }
+
+    if (!broadcasts[broadcastIndex].receivedBy.includes(deviceId)) {
+      broadcasts[broadcastIndex].receivedBy.push(deviceId);
+      saveBroadcastMessages(broadcasts);
+      console.log(
+        `✅ Marked broadcast ${broadcastId} as received by device ${deviceId} (alias endpoint)`
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Broadcast marked as received",
+    });
+  } catch (error) {
+    console.error("❌ Error in alias endpoint:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({
