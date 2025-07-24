@@ -676,6 +676,155 @@ app.post("/api/messages/broadcasts/received", (req, res) => {
   }
 });
 
+// Get all users (derived from devices)
+app.get("/api/users", (req, res) => {
+  try {
+    const devices = getDevices();
+
+    // Extract unique users from devices
+    const usersMap = new Map();
+
+    devices.forEach((device) => {
+      if (device.userId) {
+        if (!usersMap.has(device.userId)) {
+          usersMap.set(device.userId, {
+            id: device.userId,
+            displayName: device.deviceName || device.userId,
+            email: device.email || null,
+            deviceCount: 1,
+            devices: [device.id],
+          });
+        } else {
+          // Update existing user entry
+          const user = usersMap.get(device.userId);
+          user.deviceCount = (user.deviceCount || 0) + 1;
+          if (!user.devices.includes(device.id)) {
+            user.devices.push(device.id);
+          }
+        }
+      }
+    });
+
+    // Convert map to array
+    const users = Array.from(usersMap.values());
+    console.log(`📊 Retrieved ${users.length} unique users from ${devices.length} devices`);
+
+    res.json(users);
+  } catch (error) {
+    console.error("❌ Error retrieving users:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a specific user by ID
+app.get("/api/users/:userId", (req, res) => {
+  try {
+    const { userId } = req.params;
+    const devices = getDevices();
+
+    // Find all devices for this user
+    const userDevices = devices.filter((device) => device.userId === userId);
+
+    if (userDevices.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Construct user object
+    const user = {
+      id: userId,
+      displayName: userDevices[0].deviceName || userId,
+      email: userDevices[0].email || null,
+      deviceCount: userDevices.length,
+      devices: userDevices.map((d) => ({
+        id: d.id,
+        platform: d.platform,
+        createdAt: d.createdAt,
+        lastSeen: d.lastSeen,
+      })),
+    };
+
+    res.json(user);
+  } catch (error) {
+    console.error("❌ Error retrieving user:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all devices for a specific user
+app.get("/api/users/:userId/devices", (req, res) => {
+  try {
+    const { userId } = req.params;
+    const devices = getDevices();
+
+    // Find all devices for this user
+    const userDevices = devices.filter((device) => device.userId === userId);
+
+    if (userDevices.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(userDevices);
+  } catch (error) {
+    console.error("❌ Error retrieving user devices:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create or update a user
+app.post("/api/users", (req, res) => {
+  try {
+    const userData = req.body;
+    
+    if (!userData.id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+    
+    const devices = getDevices();
+    let userDevices = devices.filter(device => device.userId === userData.id);
+    
+    // If this is a new user without devices, create a placeholder device
+    if (userDevices.length === 0 && userData.token) {
+      const newDevice = {
+        id: Date.now().toString(),
+        token: userData.token,
+        userId: userData.id,
+        platform: userData.platform || "unknown",
+        deviceName: userData.deviceName || userData.id,
+        email: userData.email,
+        createdAt: new Date().toISOString(),
+        lastSeen: new Date().toISOString()
+      };
+      
+      devices.push(newDevice);
+      saveDevices(devices);
+      userDevices = [newDevice];
+    } else if (userDevices.length > 0) {
+      // Update user info on all their devices
+      userDevices.forEach(device => {
+        device.email = userData.email || device.email;
+        device.deviceName = userData.displayName || userData.email || device.deviceName;
+        device.lastSeen = new Date().toISOString();
+        
+        // Update token if provided
+        if (userData.token) {
+          device.token = userData.token;
+        }
+      });
+      saveDevices(devices);
+    }
+    
+    res.json({
+      success: true,
+      message: userDevices.length > 0 ? "User updated" : "User created",
+      deviceCount: userDevices.length,
+      userId: userData.id
+    });
+  } catch (error) {
+    console.error("❌ Error creating/updating user:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({
@@ -724,6 +873,12 @@ app.get("/api/metadata", (req, res) => {
           { method: "PATCH", path: "/api/broadcasts" },
         ],
       },
+      users: {
+        getAll: { method: "GET", path: "/api/users" },
+        getOne: { method: "GET", path: "/api/users/:userId" },
+        getDevices: { method: "GET", path: "/api/users/:userId/devices" },
+        createOrUpdate: { method: "POST", path: "/api/users" },
+      },
     },
   });
 });
@@ -761,6 +916,24 @@ app.get("/api/debug", (req, res) => {
     });
   } catch (error) {
     console.error("Error in debug endpoint:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get recent broadcasts
+app.get("/api/broadcasts/recent", (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const broadcasts = getBroadcastMessages();
+    
+    // Sort by sentAt date (most recent first) and limit
+    const recentBroadcasts = broadcasts
+      .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
+      .slice(0, parseInt(limit));
+    
+    res.json(recentBroadcasts);
+  } catch (error) {
+    console.error("❌ Error getting recent broadcasts:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -812,6 +985,11 @@ if (process.env.NODE_ENV !== "production") {
     );
     console.log(`   - GET /health - Health check`);
     console.log(`   - GET /api/debug - Debug endpoint`);
+    console.log(`   - GET /api/users - Get all users`);
+    console.log(`   - GET /api/users/:userId - Get a specific user`);
+    console.log(`   - GET /api/users/:userId/devices - Get a user's devices`);
+    console.log(`   - POST /api/users - Create or update a user`);
+    console.log(`   - GET /api/broadcasts/recent - Get recent broadcasts`);
   });
 
   // Handle server errors
