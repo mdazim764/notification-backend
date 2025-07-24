@@ -100,6 +100,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add this before your other routes
+app.options("*", cors());
+
 // Helper functions with Vercel serverless support
 const readFile = (filePath) => {
   if (process.env.NODE_ENV === "production") {
@@ -461,37 +464,137 @@ app.post("/api/broadcasts/received", (req, res) => {
   }
 });
 
+// Update a broadcast (PUT method)
+app.put("/api/broadcasts", (req, res) => {
+  try {
+    const { id, deviceId, status } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Broadcast ID is required" });
+    }
+
+    const broadcasts = getBroadcastMessages();
+    const broadcastIndex = broadcasts.findIndex((b) => b.id === id);
+
+    if (broadcastIndex === -1) {
+      return res.status(404).json({ error: "Broadcast not found" });
+    }
+
+    // If deviceId is provided and status is 'received', mark as received
+    if (deviceId && status === "received") {
+      if (!broadcasts[broadcastIndex].receivedBy.includes(deviceId)) {
+        broadcasts[broadcastIndex].receivedBy.push(deviceId);
+        console.log(
+          `✅ Marked broadcast ${id} as received by device ${deviceId} (PUT)`
+        );
+      }
+    }
+
+    // Save updates
+    saveBroadcastMessages(broadcasts);
+
+    res.json({
+      success: true,
+      message: "Broadcast updated successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error updating broadcast:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Partial update for broadcast (PATCH method)
+app.patch("/api/broadcasts", (req, res) => {
+  try {
+    const { id, deviceId, status } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Broadcast ID is required" });
+    }
+
+    const broadcasts = getBroadcastMessages();
+    const broadcastIndex = broadcasts.findIndex((b) => b.id === id);
+
+    if (broadcastIndex === -1) {
+      return res.status(404).json({ error: "Broadcast not found" });
+    }
+
+    // If deviceId is provided and status is 'received', mark as received
+    if (deviceId && status === "received") {
+      if (!broadcasts[broadcastIndex].receivedBy.includes(deviceId)) {
+        broadcasts[broadcastIndex].receivedBy.push(deviceId);
+        console.log(
+          `✅ Marked broadcast ${id} as received by device ${deviceId} (PATCH)`
+        );
+      }
+    }
+
+    // Save updates
+    saveBroadcastMessages(broadcasts);
+
+    res.json({
+      success: true,
+      message: "Broadcast updated successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error updating broadcast:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all devices for broadcast admin
 app.get("/api/broadcast/devices", (req, res) => {
   const devices = getDevices();
   res.json(devices);
 });
 
-// Send notification to specific users
+// Send notification to specific users - Enhanced error handling
 app.post("/api/messages/send-targeted", (req, res) => {
   try {
+    console.log("📨 Received targeted message request:", req.body);
+
     const { messageId, targetUsers } = req.body;
 
     if (!messageId) {
+      console.log("❌ Missing messageId in request");
       return res.status(400).json({ error: "Message ID is required" });
     }
 
     const pendingMessages = getPendingMessages();
+    console.log(`🔍 Looking for message with ID: ${messageId}`);
+    console.log(`📊 Total pending messages: ${pendingMessages.length}`);
+
+    if (pendingMessages.length > 0) {
+      console.log(
+        "Available message IDs:",
+        pendingMessages.map((m) => m.id)
+      );
+    }
+
     const messageIndex = pendingMessages.findIndex((m) => m.id === messageId);
 
     if (messageIndex === -1) {
+      console.log(`❌ Message with ID ${messageId} not found`);
       return res.status(404).json({ error: "Message not found" });
     }
 
     const messageToSend = pendingMessages[messageIndex];
     const devices = getDevices();
 
+    console.log(`📱 Found ${devices.length} total devices`);
+    console.log(
+      `🎯 Targeting users: ${targetUsers ? targetUsers.join(", ") : "all"}`
+    );
+
     const targetDevices =
       targetUsers && targetUsers.length > 0
         ? devices.filter((device) => targetUsers.includes(device.userId))
         : devices;
 
+    console.log(`📱 Found ${targetDevices.length} matching devices`);
+
     if (targetDevices.length === 0) {
+      console.log("❌ No matching devices found");
       return res.status(404).json({
         error: "No matching devices found for specified users",
       });
@@ -518,12 +621,17 @@ app.post("/api/messages/send-targeted", (req, res) => {
     sentMessages.push(sentMessage);
     saveSentMessages(sentMessages);
 
+    console.log(
+      `✅ Message ${messageId} sent to ${targetDevices.length} devices`
+    );
+
     res.json({
       success: true,
       messageId: messageToSend.id,
       sentTo: targetDevices.length,
     });
   } catch (error) {
+    console.error("❌ Error sending targeted message:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -545,6 +653,38 @@ app.get("/", (req, res) => {
     status: "API is running",
     version: "1.0.0",
     endpoints: ["/api/devices", "/api/messages", "/api/broadcasts", "/health"],
+  });
+});
+
+// API metadata endpoint to help clients discover endpoints
+app.get("/api/metadata", (req, res) => {
+  res.json({
+    version: "1.0.0",
+    serverTime: new Date().toISOString(),
+    endpoints: {
+      devices: {
+        register: { method: "POST", path: "/api/devices" },
+        getAll: { method: "GET", path: "/api/devices" },
+      },
+      messages: {
+        create: { method: "POST", path: "/api/messages" },
+        getPending: { method: "GET", path: "/api/messages/pending" },
+        getSent: { method: "GET", path: "/api/messages/sent" },
+        send: { method: "POST", path: "/api/messages/send" },
+        sendTargeted: { method: "POST", path: "/api/messages/send-targeted" },
+        markRead: { method: "POST", path: "/api/messages/read" },
+      },
+      broadcasts: {
+        getAll: { method: "GET", path: "/api/broadcasts" },
+        send: { method: "POST", path: "/api/broadcasts/send" },
+        markReceived: [
+          { method: "POST", path: "/api/broadcasts/received" },
+          { method: "POST", path: "/api/messages/broadcasts/received" },
+          { method: "PUT", path: "/api/broadcasts" },
+          { method: "PATCH", path: "/api/broadcasts" },
+        ],
+      },
+    },
   });
 });
 
