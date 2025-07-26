@@ -707,7 +707,9 @@ app.get("/api/users", (req, res) => {
 
     // Convert map to array
     const users = Array.from(usersMap.values());
-    console.log(`📊 Retrieved ${users.length} unique users from ${devices.length} devices`);
+    console.log(
+      `📊 Retrieved ${users.length} unique users from ${devices.length} devices`
+    );
 
     res.json(users);
   } catch (error) {
@@ -774,14 +776,14 @@ app.get("/api/users/:userId/devices", (req, res) => {
 app.post("/api/users", (req, res) => {
   try {
     const userData = req.body;
-    
+
     if (!userData.id) {
       return res.status(400).json({ error: "User ID is required" });
     }
-    
+
     const devices = getDevices();
-    let userDevices = devices.filter(device => device.userId === userData.id);
-    
+    let userDevices = devices.filter((device) => device.userId === userData.id);
+
     // If this is a new user without devices, create a placeholder device
     if (userDevices.length === 0 && userData.token) {
       const newDevice = {
@@ -792,19 +794,20 @@ app.post("/api/users", (req, res) => {
         deviceName: userData.deviceName || userData.id,
         email: userData.email,
         createdAt: new Date().toISOString(),
-        lastSeen: new Date().toISOString()
+        lastSeen: new Date().toISOString(),
       };
-      
+
       devices.push(newDevice);
       saveDevices(devices);
       userDevices = [newDevice];
     } else if (userDevices.length > 0) {
       // Update user info on all their devices
-      userDevices.forEach(device => {
+      userDevices.forEach((device) => {
         device.email = userData.email || device.email;
-        device.deviceName = userData.displayName || userData.email || device.deviceName;
+        device.deviceName =
+          userData.displayName || userData.email || device.deviceName;
         device.lastSeen = new Date().toISOString();
-        
+
         // Update token if provided
         if (userData.token) {
           device.token = userData.token;
@@ -812,12 +815,12 @@ app.post("/api/users", (req, res) => {
       });
       saveDevices(devices);
     }
-    
+
     res.json({
       success: true,
       message: userDevices.length > 0 ? "User updated" : "User created",
       deviceCount: userDevices.length,
-      userId: userData.id
+      userId: userData.id,
     });
   } catch (error) {
     console.error("❌ Error creating/updating user:", error);
@@ -925,12 +928,12 @@ app.get("/api/broadcasts/recent", (req, res) => {
   try {
     const { limit = 10 } = req.query;
     const broadcasts = getBroadcastMessages();
-    
+
     // Sort by sentAt date (most recent first) and limit
     const recentBroadcasts = broadcasts
       .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
       .slice(0, parseInt(limit));
-    
+
     res.json(recentBroadcasts);
   } catch (error) {
     console.error("❌ Error getting recent broadcasts:", error);
